@@ -4,6 +4,7 @@ import urllib2
 import os
 import shutil
 import MySQLdb
+import redis
 import json
 from hashlib import md5
 from counter import create_counter
@@ -16,6 +17,9 @@ SONG_URL = "https://api.douban.com/v2/fm/playlist"
 
 APP_NAME = "radio_android"
 VERSION = 642
+
+
+FILE_HASH_KEY = "file_hash"
 
 
 def wrap_url(base_uri, **kwargs):
@@ -46,7 +50,7 @@ class Spider(object):
         if not basedir.endswith("/"):
             basedir += "/"
         self.basedir = basedir
-        self.filehash = []
+        self.r = redis.Redis("localhost")
         self.db = MySQLdb.connect("localhost", "root", "a767813944", "highpump")
         self.db.set_character_set("utf8")
         create_counter("sid", 11)
@@ -89,10 +93,11 @@ class Spider(object):
         tmpf.write(binary)
         fhash = md5(binary).hexdigest()
         # print "File Hash:%s" % fhash
-        if fhash not in self.filehash:
+        if not self.r.sismember(FILE_HASH_KEY, fhash):
             sid = get_sid(fhash)
             path = self.basedir + sid + ".mp4"
             shutil.copy("tmp.mp4", path)
+            self.r.sadd(FILE_HASH_KEY, fhash)
             return sid
         return None
 
@@ -101,6 +106,7 @@ class Spider(object):
         cursor = self.db.cursor()
         sql = "insert into highpump.t_song_info (sid, name, artist, album, state, length)  \
                 values ('%s', '%s', '%s', '%s', %d, %d)" % (sid, name, artist, album, state, length)
+        print sql
         cursor.execute(sql)
         self.db.commit()
 
