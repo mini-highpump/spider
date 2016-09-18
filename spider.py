@@ -6,6 +6,7 @@ import shutil
 import MySQLdb
 import redis
 import json
+import datetime
 from hashlib import md5
 from counter import create_counter
 from tool import get_sid
@@ -104,8 +105,9 @@ class Spider(object):
 
     def write_db(self, sid, name, artist, album, state, length):
         cursor = self.db.cursor()
-        sql = "insert into highpump.t_song_info (sid, name, artist, album, state, length)  \
-                values ('%s', '%s', '%s', '%s', %d, %d)" % (sid, name, artist, album, state, length)
+        curtime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        sql = "insert into highpump.t_song_info (sid, name, artist, album, state, length, create_time, modify_time)  \
+                values ('%s', '%s', '%s', '%s', %d, %d)" % (sid, name, artist, album, state, length, curtime, curtime)
         print sql
         cursor.execute(sql)
         self.db.commit()
