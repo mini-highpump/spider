@@ -107,7 +107,7 @@ class Spider(object):
         cursor = self.db.cursor()
         curtime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         sql = "insert into highpump.t_song_info (sid, name, artist, album, state, length, create_time, modify_time)  \
-                values ('%s', '%s', '%s', '%s', %d, %d)" % (sid, name, artist, album, state, length, curtime, curtime)
+                values ('%s', '%s', '%s', '%s', %d, %d, '%s', '%s')" % (sid, name, artist, album, state, length, curtime, curtime)
         # print sql
         cursor.execute(sql)
         self.db.commit()
