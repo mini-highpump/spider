@@ -6,6 +6,8 @@ import shutil
 import MySQLdb
 import redis
 import json
+import time
+import random
 from datetime import datetime
 from hashlib import md5
 from counter import create_counter
@@ -126,6 +128,8 @@ class Spider(object):
                 sum += 1
                 total += 1
                 print "    Complete %d songs of this channel. Total %d songs." % (sum, total)
+                delay = int(random.random() * 5)
+                time.sleep(delay)
                 if sum > 300:
                     break
 
