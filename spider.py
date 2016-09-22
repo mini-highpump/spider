@@ -109,15 +109,19 @@ class Spider(object):
         cursor = self.db.cursor()
         curtime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         sql = "insert into highpump.t_song_info (sid, name, artist, album, state, length, create_time, modify_time)  \
-                values ('%s', '%s', '%s', '%s', %d, %d, '%s', '%s')" % (sid, name, artist, album, state, length, curtime, curtime)
+                values (%s, %s, %s, %s, %s, %s, %s, %s)" 
         # print sql
-        cursor.execute(sql)
+        cursor.execute(sql, (sid, name, artist, album, state, length, curtime, curtime))
         self.db.commit()
 
 
     def run(self):
         total = 0
+	cnt = 0
         for name, channel_id in self.get_channel():
+	    if cnt < 3:
+		cnt +=1
+		continue	
             sum = 0
             print "Preparing download %s channel songs." % name
             for s in self.get_song(channel_id):
@@ -128,9 +132,7 @@ class Spider(object):
                 sum += 1
                 total += 1
                 print "    Complete %d songs of this channel. Total %d songs." % (sum, total)
-                delay = int(random.random() * 5)
-                time.sleep(delay)
-                if sum > 300:
+                if sum > 30:
                     break
 
 
